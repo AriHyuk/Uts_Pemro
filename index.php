@@ -254,8 +254,8 @@ $menu = get_menu($mysqli);
         const minumTotalQty = r.minumItems.reduce((sum, item) => sum + item.qty, 0);
         tr.innerHTML = `
           <td>${r.nasiName||'-'}</td><td>${r.nasiQty||0}</td>
-          <td>${laukDisplay}</td><td>${r.laukTotalQty||0}</td>
-          <td>${minumDisplay}</td><td>${r.minumTotalQty||0}</td>
+          <td>${laukDisplay}</td><td>${laukTotalQty||0}</td>
+          <td>${minumDisplay}</td><td>${minumTotalQty||0}</td>
           <td class="text-end">${rupiah(r.subtotal)}</td>
           <td class="text-end"><button class="btn btn-sm btn-outline-danger" data-i="${i}">Hapus</button></td>`;
         body.appendChild(tr);
