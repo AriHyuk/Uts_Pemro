@@ -11,15 +11,7 @@ $note = trim((string)($_POST['note'] ?? ''));
 // Ambil harga valid dari DB
 $ids = [];
 foreach ($cart as $row) {
-  foreach (($row['nasiItems'] ?? []) as $nasi) {
-    $ids[] = (int)$nasi['id'];
-  }
-  foreach (($row['laukItems'] ?? []) as $lauk) {
-    $ids[] = (int)$lauk['id'];
-  }
-  foreach (($row['minumItems'] ?? []) as $minum) {
-    $ids[] = (int)$minum['id'];
-  }
+  $ids[] = (int)$row['id'];
 }
 $ids = array_values(array_unique(array_filter($ids)));
 $prices = [];
@@ -40,35 +32,13 @@ $orderItems = [];
 
 // Flatten tiap baris menjadi item per menu (lebih jelas di struk)
 foreach ($cart as $row) {
-  if (!empty($row['nasiId']) && !empty($row['nasiQty'])) {
-    $id = (int)$row['nasiId'];
-    if (isset($prices[$id])) {
-      $qty = max(0,(int)$row['nasiQty']);
-      $unit = (int)$prices[$id]['price'];
-      $sub = $unit * $qty;
-      $total += $sub;
-      $orderItems[] = ['menu_id'=>$id,'name'=>$prices[$id]['name'],'unit'=>$unit,'qty'=>$qty,'sub'=>$sub];
-    }
-  }
-  foreach (($row['laukItems'] ?? []) as $lauk) {
-    $id = (int)$lauk['id'];
-    if (isset($prices[$id])) {
-      $qty = max(0,(int)$lauk['qty']);
-      $unit = (int)$prices[$id]['price'];
-      $sub = $unit * $qty;
-      $total += $sub;
-      $orderItems[] = ['menu_id'=>$id,'name'=>$prices[$id]['name'],'unit'=>$unit,'qty'=>$qty,'sub'=>$sub];
-    }
-  }
-  foreach (($row['minumItems'] ?? []) as $minum) {
-    $id = (int)$minum['id'];
-    if (isset($prices[$id])) {
-      $qty = max(0,(int)$minum['qty']);
-      $unit = (int)$prices[$id]['price'];
-      $sub = $unit * $qty;
-      $total += $sub;
-      $orderItems[] = ['menu_id'=>$id,'name'=>$prices[$id]['name'],'unit'=>$unit,'qty'=>$qty,'sub'=>$sub];
-    }
+  $id = (int)$row['id'];
+  if (isset($prices[$id])) {
+    $qty = max(0,(int)$row['qty']);
+    $unit = (int)$prices[$id]['price'];
+    $sub = $unit * $qty;
+    $total += $sub;
+    $orderItems[] = ['menu_id'=>$id,'name'=>$prices[$id]['name'],'unit'=>$unit,'qty'=>$qty,'sub'=>$sub];
   }
 }
 

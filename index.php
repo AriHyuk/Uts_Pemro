@@ -183,81 +183,90 @@ $menu = get_menu($mysqli);
 </div>
 
 <script>
-  let cart = []; // tiap baris: { nasiId, nasiName, nasiQty, laukIds[], laukNames[], laukQty, minumIds[], minumNames[], minumQty, subtotal }
+  let cart = []; // tiap item: { id, name, price, qty, type, subtotal }
 
   const rupiah = (n) => 'Rp ' + (n||0).toLocaleString('id-ID');
 
   function readSel() {
-    const nasiItems = [];
+    const items = [];
+
+    // Nasi
     document.querySelectorAll('.nasiCheck:checked').forEach(check => {
       const id = parseInt(check.value,10);
       const qtyInput = document.querySelector(`.nasiQty[data-id="${id}"]`);
       const qty = Math.max(0, parseInt(qtyInput.value||'0',10));
       if (qty > 0) {
-        nasiItems.push({
+        const price = parseInt(check.getAttribute('data-price'),10);
+        items.push({
           id: id,
           name: check.getAttribute('data-name'),
-          qty: qty
+          price: price,
+          qty: qty,
+          type: 'nasi',
+          subtotal: price * qty
         });
       }
     });
-    const laukItems = [];
+    
+    // Lauk
     document.querySelectorAll('.laukCheck:checked').forEach(check => {
       const id = parseInt(check.value,10);
       const qtyInput = document.querySelector(`.laukQty[data-id="${id}"]`);
       const qty = Math.max(0, parseInt(qtyInput.value||'0',10));
       if (qty > 0) {
-        laukItems.push({
+        const price = parseInt(check.getAttribute('data-price'),10);
+        items.push({
           id: id,
           name: check.getAttribute('data-name'),
-          qty: qty
+          price: price,
+          qty: qty,
+          type: 'lauk',
+          subtotal: price * qty
         });
       }
     });
-    const minumItems = [];
+
+    // Minum
     document.querySelectorAll('.minumCheck:checked').forEach(check => {
       const id = parseInt(check.value,10);
       const qtyInput = document.querySelector(`.minumQty[data-id="${id}"]`);
       const qty = Math.max(0, parseInt(qtyInput.value||'0',10));
       if (qty > 0) {
-        minumItems.push({
+        const price = parseInt(check.getAttribute('data-price'),10);
+        items.push({
           id: id,
           name: check.getAttribute('data-name'),
-          qty: qty
+          price: price,
+          qty: qty,
+          type: 'minum',
+          subtotal: price * qty
         });
       }
     });
-    return {nasiItems, laukItems, minumItems};
-  }
-
-  function calcSubtotal(sel) {
-    let sub = 0;
-    sel.nasiItems.forEach(item => {
-      const price = parseInt(document.querySelector(`#nasi-${item.id}`).dataset.price,10);
-      sub += price * item.qty;
-    });
-    sel.laukItems.forEach(item => {
-      const price = parseInt(document.querySelector(`#lauk-${item.id}`).dataset.price,10);
-      sub += price * item.qty;
-    });
-    sel.minumItems.forEach(item => {
-      const price = parseInt(document.querySelector(`#minum-${item.id}`).dataset.price,10);
-      sub += price * item.qty;
-    });
-    return sub;
+    return items;
   }
 
   function addToCart() {
     const sel = readSel();
-    const hasAny = sel.nasiItems.length > 0 || sel.laukItems.length > 0 || sel.minumItems.length > 0;
-    if (!hasAny) { alert('Pilih minimal satu item dengan jumlah > 0'); return; }
-    sel.subtotal = calcSubtotal(sel);
-    cart.push(sel);
+    if (sel.length === 0) { 
+      alert('Pilih minimal satu item dengan jumlah > 0'); 
+      return; 
+    }
+
+    sel.forEach(item => {
+      cart.push(item);
+    })
+
     renderCart();
     resetFormOnly();
   }
 
-  function removeRow(i){ cart.splice(i,1); renderCart(); }
+  function removeRow(i){ 
+    if (confirm('Hapus item ini dari keranjang?')) {
+      cart.splice(i,1); 
+      renderCart(); 
+    }
+  }
 
   function renderCart(){
     const body = document.getElementById('cartBody');
@@ -266,44 +275,14 @@ $menu = get_menu($mysqli);
       body.innerHTML = '<tr class="text-center text-muted" id="emptyRow"><td colspan="5">Belum ada pesanan.</td></tr>';
     } else {
       cart.forEach((r,i)=>{
-        // Nasi items
-        r.nasiItems.forEach(nasi => {
-          const price = parseInt(document.querySelector(`#nasi-${nasi.id}`).dataset.price,10);
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${nasi.name}</td>
-            <td class="text-end">${rupiah(price)}</td>
-            <td class="text-end">${nasi.qty}</td>
-            <td class="text-end">${rupiah(price * nasi.qty)}</td>
-            <td class="text-end"><button class="btn btn-sm btn-outline-danger" data-i="${i}">Hapus</button></td>`;
-          body.appendChild(tr);
-        });
-
-        // Lauk items
-        r.laukItems.forEach(lauk => {
-          const price = parseInt(document.querySelector(`#lauk-${lauk.id}`).dataset.price,10);
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${lauk.name}</td>
-            <td class="text-end">${rupiah(price)}</td>
-            <td class="text-end">${lauk.qty}</td>
-            <td class="text-end">${rupiah(price * lauk.qty)}</td>
-            <td class="text-end"><button class="btn btn-sm btn-outline-danger" data-i="${i}">Hapus</button></td>`;
-          body.appendChild(tr);
-        });
-
-        // Minum items
-        r.minumItems.forEach(minum => {
-          const price = parseInt(document.querySelector(`#minum-${minum.id}`).dataset.price,10);
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${minum.name}</td>
-            <td class="text-end">${rupiah(price)}</td>
-            <td class="text-end">${minum.qty}</td>
-            <td class="text-end">${rupiah(price * minum.qty)}</td>
-            <td class="text-end"><button class="btn btn-sm btn-outline-danger" data-i="${i}">Hapus</button></td>`;
-          body.appendChild(tr);
-        });
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${r.name}</td>
+          <td class="text-end">${rupiah(r.price)}</td>
+          <td class="text-end">${r.qty}</td>
+          <td class="text-end">${rupiah(r.subtotal)}</td>
+          <td class="text-end"><button class="btn btn-sm btn-outline-danger" data-i="${i}">Hapus</button></td>`;
+        body.appendChild(tr);
       });
       body.querySelectorAll('button[data-i]').forEach(b=>b.onclick=()=>removeRow(parseInt(b.dataset.i,10)));
     }
