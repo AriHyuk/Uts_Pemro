@@ -11,9 +11,15 @@ $note = trim((string)($_POST['note'] ?? ''));
 // Ambil harga valid dari DB
 $ids = [];
 foreach ($cart as $row) {
-  if (!empty($row['nasiId'])) $ids[] = (int)$row['nasiId'];
-  foreach (($row['laukIds'] ?? []) as $i) $ids[] = (int)$i;
-  foreach (($row['minumIds'] ?? []) as $i) $ids[] = (int)$i;
+  foreach (($row['nasiItems'] ?? []) as $nasi) {
+    $ids[] = (int)$nasi['id'];
+  }
+  foreach (($row['laukItems'] ?? []) as $lauk) {
+    $ids[] = (int)$lauk['id'];
+  }
+  foreach (($row['minumItems'] ?? []) as $minum) {
+    $ids[] = (int)$minum['id'];
+  }
 }
 $ids = array_values(array_unique(array_filter($ids)));
 $prices = [];

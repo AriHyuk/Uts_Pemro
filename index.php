@@ -22,23 +22,32 @@ $menu = get_menu($mysqli);
   <div class="box p-4">
 
     <div class="row g-4">
-      <!-- NASI -->
-      <div class="col-lg-4">
-        <div class="border rounded p-3 h-100">
-          <h6 class="mb-3">Nasi</h6>
-          <label class="form-label">Pilih Nasi</label>
-          <select id="nasiSelect" class="form-select">
-            <option value="">-- pilih --</option>
-            <?php foreach ($menu['nasi'] as $m): ?>
-              <option value="<?= (int)$m['id'] ?>" data-price="<?= (int)$m['price'] ?>">
-                <?= e($m['name']) ?> (<?= rupiah((int)$m['price']) ?>)
-              </option>
-            <?php endforeach; ?>
-          </select>
-          <label class="form-label mt-2">Jumlah</label>
-          <input type="number" min="0" value="0" id="nasiQty" class="form-control">
+    <!-- NASI -->
+    <div class="col-lg-4">
+      <div class="border rounded p-3 h-100">
+        <h6 class="mb-3">Nasi</h6>
+        <div class="mb-2" id="nasiList">
+          <?php foreach ($menu['nasi'] as $m): ?>
+            <div class="row g-2 align-items-center mb-2">
+              <div class="col-1">
+                <input class="form-check-input nasiCheck" type="checkbox"
+                      value="<?= (int)$m['id'] ?>" id="nasi-<?= (int)$m['id'] ?>"
+                      data-price="<?= (int)$m['price'] ?>" data-name="<?= e($m['name']) ?>">
+              </div>
+              <div class="col-7">
+                <label class="form-check-label" for="nasi-<?= (int)$m['id'] ?>">
+                  <?= e($m['name']) ?> (<?= rupiah((int)$m['price']) ?>)
+                </label>
+              </div>
+              <div class="col-4">
+                <input type="number" min="0" value="0" class="form-control form-control-sm nasiQty" 
+                      data-id="<?= (int)$m['id'] ?>" disabled>
+              </div>
+            </div>
+          <?php endforeach; ?>
         </div>
       </div>
+    </div>
 
       <!-- LAUK -->
       <div class="col-lg-4">
@@ -176,13 +185,22 @@ $menu = get_menu($mysqli);
 <script>
   let cart = []; // tiap baris: { nasiId, nasiName, nasiQty, laukIds[], laukNames[], laukQty, minumIds[], minumNames[], minumQty, subtotal }
 
-  const rupiah = (n) => 'Rp' + (n||0).toLocaleString('id-ID');
+  const rupiah = (n) => 'Rp ' + (n||0).toLocaleString('id-ID');
 
   function readSel() {
-    const nasiSel = document.getElementById('nasiSelect');
-    const nasiId  = nasiSel.value ? parseInt(nasiSel.value,10) : null;
-    const nasiName= nasiSel.options[nasiSel.selectedIndex]?.text?.split(' (')[0] || '';
-    const nasiQty = Math.max(0, parseInt(document.getElementById('nasiQty').value||'0',10));
+    const nasiItems = [];
+    document.querySelectorAll('.nasiCheck:checked').forEach(check => {
+      const id = parseInt(check.value,10);
+      const qtyInput = document.querySelector(`.nasiQty[data-id="${id}"]`);
+      const qty = Math.max(0, parseInt(qtyInput.value||'0',10));
+      if (qty > 0) {
+        nasiItems.push({
+          id: id,
+          name: check.getAttribute('data-name'),
+          qty: qty
+        });
+      }
+    });
     const laukItems = [];
     document.querySelectorAll('.laukCheck:checked').forEach(check => {
       const id = parseInt(check.value,10);
@@ -209,15 +227,15 @@ $menu = get_menu($mysqli);
         });
       }
     });
-    return {nasiId,nasiName,nasiQty,laukItems,minumItems};
+    return {nasiItems, laukItems, minumItems};
   }
 
   function calcSubtotal(sel) {
     let sub = 0;
-    if (sel.nasiId && sel.nasiQty>0) {
-      const price = parseInt(document.querySelector(`#nasiSelect option[value="${sel.nasiId}"]`).dataset.price,10);
-      sub += price * sel.nasiQty;
-    }
+    sel.nasiItems.forEach(item => {
+      const price = parseInt(document.querySelector(`#nasi-${item.id}`).dataset.price,10);
+      sub += price * item.qty;
+    });
     sel.laukItems.forEach(item => {
       const price = parseInt(document.querySelector(`#lauk-${item.id}`).dataset.price,10);
       sub += price * item.qty;
@@ -231,7 +249,7 @@ $menu = get_menu($mysqli);
 
   function addToCart() {
     const sel = readSel();
-    const hasAny = (sel.nasiId && sel.nasiQty>0) || sel.laukItems.length > 0 || sel.minumItems.length > 0;
+    const hasAny = sel.nasiItems.length > 0 || sel.laukItems.length > 0 || sel.minumItems.length > 0;
     if (!hasAny) { alert('Pilih minimal satu item dengan jumlah > 0'); return; }
     sel.subtotal = calcSubtotal(sel);
     cart.push(sel);
@@ -248,18 +266,18 @@ $menu = get_menu($mysqli);
       body.innerHTML = '<tr class="text-center text-muted" id="emptyRow"><td colspan="5">Belum ada pesanan.</td></tr>';
     } else {
       cart.forEach((r,i)=>{
-        // Nasi
-        if (r.nasiId && r.nasiQty > 0) {
-          const price = parseInt(document.querySelector(`#nasiSelect option[value="${r.nasiId}"]`).dataset.price,10);
+        // Nasi items
+        r.nasiItems.forEach(nasi => {
+          const price = parseInt(document.querySelector(`#nasi-${nasi.id}`).dataset.price,10);
           const tr = document.createElement('tr');
           tr.innerHTML = `
-            <td>${r.nasiName}</td>
+            <td>${nasi.name}</td>
             <td class="text-end">${rupiah(price)}</td>
-            <td class="text-end">${r.nasiQty}</td>
-            <td class="text-end">${rupiah(price * r.nasiQty)}</td>
+            <td class="text-end">${nasi.qty}</td>
+            <td class="text-end">${rupiah(price * nasi.qty)}</td>
             <td class="text-end"><button class="btn btn-sm btn-outline-danger" data-i="${i}">Hapus</button></td>`;
           body.appendChild(tr);
-        }
+        });
 
         // Lauk items
         r.laukItems.forEach(lauk => {
@@ -308,18 +326,22 @@ $menu = get_menu($mysqli);
   }
 
   function resetFormOnly(){
-    document.getElementById('nasiSelect').value='';
-    document.getElementById('nasiQty').value=0;
-    document.querySelectorAll('.laukCheck, .minumCheck').forEach(check => {
+    document.querySelectorAll('.nasiCheck, .laukCheck, .minumCheck').forEach(check => {
       check.checked = false;
       const id = check.value;
-      const qtyInput = check.classList.contains('laukCheck') 
-        ? document.querySelector(`.laukQty[data-id="${id}"]`)
-        : document.querySelector(`.minumQty[data-id="${id}"]`);
+      let qtyInput;
+      if (check.classList.contains('nasiCheck')) {
+        qtyInput = document.querySelector(`.nasiQty[data-id="${id}"]`);
+      } else if (check.classList.contains('laukCheck')) {
+        qtyInput = document.querySelector(`.laukQty[data-id="${id}"]`);
+      } else {
+        qtyInput = document.querySelector(`.minumQty[data-id="${id}"]`);
+      }
       qtyInput.value = 0;
       qtyInput.disabled = true;
     });  
   }
+
   function clearAll(){ cart=[]; renderCart(); 
     document.getElementById('cashInput').value=0; 
     document.getElementById('note').value=''; 
@@ -328,12 +350,17 @@ $menu = get_menu($mysqli);
   }
 
   // Enable/disable qty input ketika checkbox dicentang
-  document.querySelectorAll('.laukCheck, .minumCheck').forEach(check => {
+  document.querySelectorAll('.nasiCheck, .laukCheck, .minumCheck').forEach(check => {
     check.addEventListener('change', function() {
       const id = this.value;
-      const qtyInput = this.classList.contains('laukCheck') 
-        ? document.querySelector(`.laukQty[data-id="${id}"]`)
-        : document.querySelector(`.minumQty[data-id="${id}"]`);
+      let qtyInput;
+      if (this.classList.contains('nasiCheck')) {
+        qtyInput = document.querySelector(`.nasiQty[data-id="${id}"]`);
+      } else if (this.classList.contains('laukCheck')) {
+        qtyInput = document.querySelector(`.laukQty[data-id="${id}"]`);
+      } else {
+        qtyInput = document.querySelector(`.minumQty[data-id="${id}"]`);
+      }
       qtyInput.disabled = !this.checked;
       if (!this.checked) qtyInput.value = 0;
     });
