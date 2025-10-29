@@ -44,28 +44,24 @@ foreach ($cart as $row) {
       $orderItems[] = ['menu_id'=>$id,'name'=>$prices[$id]['name'],'unit'=>$unit,'qty'=>$qty,'sub'=>$sub];
     }
   }
-  if (!empty($row['laukIds']) && !empty($row['laukQty'])) {
-    foreach ($row['laukIds'] as $id) {
-      $id = (int)$id;
-      if (isset($prices[$id])) {
-        $qty = max(0,(int)$row['laukQty']);
-        $unit = (int)$prices[$id]['price'];
-        $sub = $unit * $qty;
-        $total += $sub;
-        $orderItems[] = ['menu_id'=>$id,'name'=>$prices[$id]['name'],'unit'=>$unit,'qty'=>$qty,'sub'=>$sub];
-      }
+  foreach (($row['laukItems'] ?? []) as $lauk) {
+    $id = (int)$lauk['id'];
+    if (isset($prices[$id])) {
+      $qty = max(0,(int)$lauk['qty']);
+      $unit = (int)$prices[$id]['price'];
+      $sub = $unit * $qty;
+      $total += $sub;
+      $orderItems[] = ['menu_id'=>$id,'name'=>$prices[$id]['name'],'unit'=>$unit,'qty'=>$qty,'sub'=>$sub];
     }
   }
-  if (!empty($row['minumIds']) && !empty($row['minumQty'])) {
-    foreach ($row['minumIds'] as $id) {
-      $id = (int)$id;
-      if (isset($prices[$id])) {
-        $qty = max(0,(int)$row['minumQty']);
-        $unit = (int)$prices[$id]['price'];
-        $sub = $unit * $qty;
-        $total += $sub;
-        $orderItems[] = ['menu_id'=>$id,'name'=>$prices[$id]['name'],'unit'=>$unit,'qty'=>$qty,'sub'=>$sub];
-      }
+  foreach (($row['minumItems'] ?? []) as $minum) {
+    $id = (int)$minum['id'];
+    if (isset($prices[$id])) {
+      $qty = max(0,(int)$minum['qty']);
+      $unit = (int)$prices[$id]['price'];
+      $sub = $unit * $qty;
+      $total += $sub;
+      $orderItems[] = ['menu_id'=>$id,'name'=>$prices[$id]['name'],'unit'=>$unit,'qty'=>$qty,'sub'=>$sub];
     }
   }
 }
