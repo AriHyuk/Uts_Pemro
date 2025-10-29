@@ -107,14 +107,15 @@ $menu = get_menu($mysqli);
       <table class="table table-sm align-middle">
         <thead class="table-light">
           <tr>
-            <th>Nasi</th><th>Jml</th>
-            <th>Lauk</th><th>Jml</th>
-            <th>Minum</th><th>Jml</th>
-            <th class="text-end">Sub Total</th><th></th>
+            <th>Item</th>
+            <th class="text-end">Harga</th>
+            <th class="text-end">Jml</th>
+            <th class="text-end">Sub Total</th>
+            <th></th>
           </tr>
         </thead>
         <tbody id="cartBody">
-          <tr class="text-center text-muted" id="emptyRow"><td colspan="8">Belum ada pesanan.</td></tr>
+          <tr class="text-center text-muted" id="emptyRow"><td colspan="5">Belum ada pesanan.</td></tr>
         </tbody>
       </table>
     </div>
@@ -244,21 +245,47 @@ $menu = get_menu($mysqli);
     const body = document.getElementById('cartBody');
     body.innerHTML = '';
     if (cart.length === 0) {
-      body.innerHTML = '<tr class="text-center text-muted" id="emptyRow"><td colspan="8">Belum ada pesanan.</td></tr>';
+      body.innerHTML = '<tr class="text-center text-muted" id="emptyRow"><td colspan="5">Belum ada pesanan.</td></tr>';
     } else {
       cart.forEach((r,i)=>{
-        const tr = document.createElement('tr');
-        const laukDisplay = r.laukItems.map(item => item.name).join(', ') || '-';
-        const laukTotalQty = r.laukItems.reduce((sum, item) => sum + item.qty, 0);
-        const minumDisplay = r.minumItems.map(item => item.name).join(', ') || '-';
-        const minumTotalQty = r.minumItems.reduce((sum, item) => sum + item.qty, 0);
-        tr.innerHTML = `
-          <td>${r.nasiName||'-'}</td><td>${r.nasiQty||0}</td>
-          <td>${laukDisplay}</td><td>${laukTotalQty||0}</td>
-          <td>${minumDisplay}</td><td>${minumTotalQty||0}</td>
-          <td class="text-end">${rupiah(r.subtotal)}</td>
-          <td class="text-end"><button class="btn btn-sm btn-outline-danger" data-i="${i}">Hapus</button></td>`;
-        body.appendChild(tr);
+        // Nasi
+        if (r.nasiId && r.nasiQty > 0) {
+          const price = parseInt(document.querySelector(`#nasiSelect option[value="${r.nasiId}"]`).dataset.price,10);
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${r.nasiName}</td>
+            <td class="text-end">${rupiah(price)}</td>
+            <td class="text-end">${r.nasiQty}</td>
+            <td class="text-end">${rupiah(price * r.nasiQty)}</td>
+            <td class="text-end"><button class="btn btn-sm btn-outline-danger" data-i="${i}">Hapus</button></td>`;
+          body.appendChild(tr);
+        }
+
+        // Lauk items
+        r.laukItems.forEach(lauk => {
+          const price = parseInt(document.querySelector(`#lauk-${lauk.id}`).dataset.price,10);
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${lauk.name}</td>
+            <td class="text-end">${rupiah(price)}</td>
+            <td class="text-end">${lauk.qty}</td>
+            <td class="text-end">${rupiah(price * lauk.qty)}</td>
+            <td class="text-end"><button class="btn btn-sm btn-outline-danger" data-i="${i}">Hapus</button></td>`;
+          body.appendChild(tr);
+        });
+
+        // Minum items
+        r.minumItems.forEach(minum => {
+          const price = parseInt(document.querySelector(`#minum-${minum.id}`).dataset.price,10);
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${minum.name}</td>
+            <td class="text-end">${rupiah(price)}</td>
+            <td class="text-end">${minum.qty}</td>
+            <td class="text-end">${rupiah(price * minum.qty)}</td>
+            <td class="text-end"><button class="btn btn-sm btn-outline-danger" data-i="${i}">Hapus</button></td>`;
+          body.appendChild(tr);
+        });
       });
       body.querySelectorAll('button[data-i]').forEach(b=>b.onclick=()=>removeRow(parseInt(b.dataset.i,10)));
     }
