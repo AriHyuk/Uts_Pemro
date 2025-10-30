@@ -10,6 +10,7 @@ $menu = get_menu($mysqli);
   <title>Resto Family — Order</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link href="style.css" rel="stylesheet">
 </head>
 <body>
@@ -235,22 +236,24 @@ $menu = get_menu($mysqli);
   function addToCart() {
     const sel = readSel();
     if (sel.length === 0) { 
-      alert('⚠️ Pilih minimal satu item dengan jumlah > 0'); 
+      Swal.fire({
+        icon: 'warning',
+        title: 'Peringatan',
+        text: 'Pilih minimal satu item dengan jumlah > 0',
+        confirmButtonColor: '#667eea'
+      });
       return; 
     }
     
     sel.forEach(newItem => {
-      // Cari apakah item sudah ada di keranjang
       const existingItemIndex = cart.findIndex(item => 
         item.id === newItem.id && item.type === newItem.type
       );
       
       if (existingItemIndex !== -1) {
-        // Jika item sudah ada, tambahkan quantity
         cart[existingItemIndex].qty += newItem.qty;
         cart[existingItemIndex].subtotal = cart[existingItemIndex].price * cart[existingItemIndex].qty;
       } else {
-        // Jika item belum ada, tambahkan sebagai item baru
         cart.push(newItem);
       }
     });
@@ -260,10 +263,28 @@ $menu = get_menu($mysqli);
   }
 
   function removeRow(i){ 
-    if (confirm('🗑️ Hapus item ini dari keranjang?')) {
-      cart.splice(i,1); 
-      renderCart(); 
-    }
+    Swal.fire({
+      icon: 'warning',
+      title: 'Hapus Item?',
+      text: 'Apakah Anda yakin ingin menghapus item ini dari keranjang?',
+      showCancelButton: true,
+      confirmButtonColor: '#e53e3e',
+      cancelButtonColor: '#667eea',
+      confirmButtonText: 'Ya, Hapus!',
+      cancelButtonText: 'Batal'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        cart.splice(i,1); 
+        renderCart();
+        Swal.fire({
+          icon: 'success',
+          title: 'Terhapus!',
+          text: 'Item berhasil dihapus dari keranjang',
+          timer: 1000,
+          showConfirmButton: false
+        });
+      }
+    });
   }
 
   function renderCart(){
@@ -343,7 +364,15 @@ $menu = get_menu($mysqli);
   document.getElementById('cashInput').addEventListener('input',recalcSummary);
 
   document.getElementById('saveBtn').onclick=()=>{
-    if (cart.length===0){ alert('⚠️ Keranjang kosong'); return; }
+    if (cart.length===0){ 
+      Swal.fire({
+        icon: 'error',
+        title: 'Keranjang Kosong',
+        text: 'Silakan tambahkan item ke keranjang terlebih dahulu',
+        confirmButtonColor: '#667eea'
+      }); 
+      return; 
+    }
     document.getElementById('cartInput').value = JSON.stringify(cart);
     document.getElementById('payMethodInput').value = document.querySelector('input[name="payMethod"]:checked').value;
     document.getElementById('cashInputHidden').value = document.getElementById('cashInput').value||'0';
