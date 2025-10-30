@@ -29,39 +29,63 @@ if (!$item) { http_response_code(404); exit('Item tidak ditemukan'); }
 <html lang="id">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Edit Menu</title>
+  <title>Edit Menu - Resto Family</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
 </head>
-<body class="p-4">
-<div class="container" style="max-width:720px">
-  <h4 class="mb-3">Edit Menu #<?= (int)$item['id'] ?></h4>
-  <form method="post" class="row g-3">
-    <input type="hidden" name="id" value="<?= (int)$item['id'] ?>">
-    <div class="col-12">
-      <label class="form-label">Nama</label>
-      <input class="form-control" name="name" required value="<?= e($item['name']) ?>">
+<body>
+<div class="container main-container py-4">
+  <div class="header-card">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+          <h1 class="brand-title-with-emoji">✏️ <span class="gradient-text">Edit Menu</span></h1>
+          <div>
+              <a class="btn btn-outline-secondary" href="menu.php">⬅️ Kembali</a>
+          </div>
+      </div>
+  </div>
+
+  <div class="main-box">
+    <div class="payment-card">
+      <h6 class="section-title">Edit Item #<?= (int)$item['id'] ?></h6>
+      <form method="post" class="row g-3">
+        <input type="hidden" name="id" value="<?= (int)$item['id'] ?>">
+        
+        <div class="col-12">
+          <label class="form-label fw-semibold">Nama Item</label>
+          <input class="form-control" name="name" required value="<?= e($item['name']) ?>">
+        </div>
+        
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Kategori</label>
+          <select class="form-select" name="category" required>
+            <?php foreach (['nasi'=>'🍚 Nasi','lauk'=>'🍗 Lauk','minum'=>'🥤 Minum'] as $k=>$v): ?>
+              <option value="<?= $k ?>" <?= $item['category']===$k?'selected':'' ?>><?= $v ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Harga</label>
+          <input class="form-control" type="number" min="0" name="price" required value="<?= (int)$item['price'] ?>">
+        </div>
+        
+        <div class="col-12">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="active" name="active" <?= $item['active']?'checked':'' ?>>
+            <label class="form-check-label fw-semibold" for="active">✅ Item Aktif</label>
+          </div>
+        </div>
+        
+        <div class="col-12 mt-4">
+          <div class="d-flex gap-2">
+            <button class="btn btn-success">💾 Simpan Perubahan</button>
+            <a class="btn btn-outline-secondary" href="menu.php">❌ Batal</a>
+          </div>
+        </div>
+      </form>
     </div>
-    <div class="col-md-6">
-      <label class="form-label">Kategori</label>
-      <select class="form-select" name="category" required>
-        <?php foreach (['nasi'=>'Nasi','lauk'=>'Lauk','minum'=>'Minum'] as $k=>$v): ?>
-          <option value="<?= $k ?>" <?= $item['category']===$k?'selected':'' ?>><?= $v ?></option>
-        <?php endforeach; ?>
-      </select>
-    </div>
-    <div class="col-md-6">
-      <label class="form-label">Harga</label>
-      <input class="form-control" type="number" min="0" name="price" required value="<?= (int)$item['price'] ?>">
-    </div>
-    <div class="col-12 form-check">
-      <input class="form-check-input" type="checkbox" id="active" name="active" <?= $item['active']?'checked':'' ?>>
-      <label class="form-check-label" for="active">Aktif</label>
-    </div>
-    <div class="col-12">
-      <button class="btn btn-primary">Simpan</button>
-      <a class="btn btn-secondary" href="menu.php">Batal</a>
-    </div>
-  </form>
+  </div>
 </div>
 </body>
 </html>

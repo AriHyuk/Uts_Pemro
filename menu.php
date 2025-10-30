@@ -20,58 +20,97 @@ $rows = $mysqli->query("SELECT id,name,category,price,active FROM menu_items ORD
 <html lang="id">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Kelola Menu</title>
+  <title>Kelola Menu - Resto Family</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
 </head>
-<body class="p-4">
-<div class="container">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="m-0">Kelola Menu</h4>
-    <div><a class="btn btn-secondary" href="index.php">Kembali ke Order</a></div>
+<body>
+<div class="container main-container py-4">
+  <div class="header-card">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+          <h1 class="brand-title-with-emoji">📋 <span class="gradient-text">Kelola Menu</span></h1>
+          <div>
+              <a class="btn btn-outline-secondary" href="index.php">⬅️ Kembali ke Order</a>
+          </div>
+      </div>
   </div>
 
-  <div class="card mb-4">
-    <div class="card-body">
-      <h6>Tambah Menu</h6>
-      <form method="post" class="row g-2">
-        <div class="col-md-4"><input class="form-control" name="name" placeholder="Nama item" required></div>
+  <div class="main-box">
+    <!-- FORM TAMBAH MENU -->
+    <div class="payment-card mb-4">
+      <h6>➕ Tambah Menu Cepat</h6>
+      <form method="post" class="row g-3">
+        <div class="col-md-4">
+          <input class="form-control" name="name" placeholder="Nama item" required>
+        </div>
         <div class="col-md-3">
           <select class="form-select" name="category" required>
-            <option value="">Kategori...</option>
-            <option value="nasi">Nasi</option>
-            <option value="lauk">Lauk</option>
-            <option value="minum">Minum</option>
+            <option value="">Pilih Kategori...</option>
+            <option value="nasi">🍚 Nasi</option>
+            <option value="lauk">🍗 Lauk</option>
+            <option value="minum">🥤 Minum</option>
           </select>
         </div>
-        <div class="col-md-3"><input class="form-control" type="number" min="0" name="price" placeholder="Harga" required></div>
-        <div class="col-md-2"><button class="btn btn-primary w-100">Tambah</button></div>
+        <div class="col-md-3">
+          <input class="form-control" type="number" min="0" name="price" placeholder="Harga" required>
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-primary w-100">Tambah</button>
+        </div>
       </form>
     </div>
-  </div>
 
-  <div class="table-responsive">
-    <table class="table table-sm align-middle">
-      <thead class="table-light"><tr><th>ID</th><th>Nama</th><th>Kategori</th><th class="text-end">Harga</th><th>Aktif</th><th class="text-end">Aksi</th></tr></thead>
-      <tbody>
-        <?php foreach ($rows as $r): ?>
+    <!-- TABEL MENU -->
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
           <tr>
-            <td><?= (int)$r['id'] ?></td>
-            <td><?= e($r['name']) ?></td>
-            <td><?= e(ucfirst($r['category'])) ?></td>
-            <td class="text-end"><?= rupiah((int)$r['price']) ?></td>
-            <td><?= $r['active'] ? 'Ya' : 'Tidak' ?></td>
-            <td class="text-end">
-              <a class="btn btn-sm btn-outline-secondary" href="menu_edit.php?id=<?= (int)$r['id'] ?>">Edit</a>
-              <form action="menu_delete.php" method="post" style="display:inline" onsubmit="return confirm('Hapus item ini?')">
-                <input type="hidden" name="id" value="<?= (int)$r['id'] ?>">
-                <button class="btn btn-sm btn-outline-danger">Hapus</button>
-              </form>
-            </td>
+            <th>ID</th>
+            <th>Nama</th>
+            <th class="text-center">Kategori</th>
+            <th class="text-end">Harga</th>
+            <th class="text-center">Status</th>
+            <th class="text-center">Aksi</th>
           </tr>
-        <?php endforeach; ?>
-        <?php if (!$rows): ?><tr><td colspan="6" class="text-center text-muted">Belum ada data.</td></tr><?php endif; ?>
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          <?php foreach ($rows as $r): ?>
+            <tr>
+              <td><strong>#<?= (int)$r['id'] ?></strong></td>
+              <td><?= e($r['name']) ?></td>
+              <td class="text-center">
+                <span class="badge 
+                  <?= $r['category'] === 'nasi' ? 'bg-warning' : 
+                    ($r['category'] === 'lauk' ? 'bg-success' : 'bg-info') ?>">
+                  <?= e(ucfirst($r['category'])) ?>
+                </span>
+              </td>
+              <td class="text-end"><strong><?= rupiah((int)$r['price']) ?></strong></td>
+              <td class="text-center">
+                <span class="badge <?= $r['active'] ? 'bg-success' : 'bg-secondary' ?>">
+                  <?= $r['active'] ? 'Aktif' : 'Nonaktif' ?>
+                </span>
+              </td>
+              <td class="text-center">
+                <div class="d-flex gap-2 justify-content-center">
+                  <a class="btn btn-sm btn-outline-primary" href="menu_edit.php?id=<?= (int)$r['id'] ?>">✏️ Edit</a>
+                  <form action="menu_delete.php" method="post" onsubmit="return confirm('Hapus item ini?')">
+                    <input type="hidden" name="id" value="<?= (int)$r['id'] ?>">
+                    <button class="btn btn-sm btn-outline-danger">🗑️ Hapus</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <?php endforeach; ?>
+          <?php if (!$rows): ?>
+            <tr class="empty-state">
+              <td colspan="6">📝 Belum ada data menu. Silakan tambah menu baru.</td>
+            </tr>
+          <?php endif; ?>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 </body>
