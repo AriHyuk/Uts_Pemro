@@ -293,6 +293,11 @@ body {
     text-align: center;
 }
 
+.table tbody .empty-state td {
+    text-align: center !important;
+    padding: 40px !important;
+}
+
 .payment-card, .summary-card {
     background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
     border: 2px solid #e8eaf6;
@@ -375,11 +380,6 @@ hr {
     font-style: italic;
 }
 
-.table tbody .empty-state td {
-    text-align: center !important;
-    padding: 40px !important;
-}
-
 .badge {
     font-size: 0.75rem;
     padding: 6px 10px;
@@ -408,6 +408,7 @@ hr {
     height: 24px;
 }
 
+/* Styling untuk receipt */
 .receipt-card {
     background: white;
     border-radius: 12px;
@@ -423,14 +424,18 @@ hr {
     margin-bottom: 20px;
 }
 
-.receipt-title {
+.receipt-title-with-emoji {
     font-weight: 700;
     font-size: 1.8rem;
+    margin-bottom: 10px;
+}
+
+.receipt-title-with-emoji .gradient-text {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    margin-bottom: 10px;
+    display: inline-block;
 }
 
 .receipt-info {
@@ -449,24 +454,52 @@ hr {
     border: 2px solid #e8eaf6;
 }
 
+.receipt-footer {
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px dashed #e8eaf6;
+    font-size: 0.8rem;
+    color: #888;
+}
+
+/* Print styles */
 @media print {
     .noprint { 
         display: none !important; 
     }
     body { 
         background: white !important; 
-        padding: 0 !important; 
+        padding: 0 !important;
+        margin: 0 !important;
+        font-size: 12px !important;
     }
     .main-container { 
         max-width: 100% !important; 
-        margin: 0 !important; 
+        margin: 0 !important;
+        padding: 10px !important;
     }
     .receipt-card { 
-        border: 2px solid #000 !important; 
-        box-shadow: none !important; 
+        border: 1px solid #000 !important; 
+        box-shadow: none !important;
+        margin: 0 !important;
+        padding: 15px !important;
+        page-break-inside: avoid;
+    }
+    .table {
+        font-size: 11px !important;
+    }
+    .receipt-title-with-emoji {
+        font-size: 1.4rem !important;
+    }
+    .receipt-title-with-emoji .gradient-text {
+        -webkit-text-fill-color: #000 !important;
+        color: #000 !important;
+        background: none !important;
     }
 }
 
+/* Responsive styles */
 @media (max-width: 768px) {
     .brand-title,
     .brand-title-with-emoji { 
@@ -493,6 +526,7 @@ hr {
     }
 }
 
+/* Utility classes */
 .text-center {
     text-align: center !important;
 }
@@ -575,95 +609,4 @@ hr {
 
 .flex-fill {
     flex: 1 1 auto !important;
-}
-
-/* Styling untuk receipt - menggunakan style yang sama dengan lainnya */
-.receipt-card {
-    background: white;
-    border-radius: 12px;
-    padding: 30px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e8eaf6;
-}
-
-.receipt-header {
-    text-align: center;
-    border-bottom: 2px dashed #e8eaf6;
-    padding-bottom: 20px;
-    margin-bottom: 20px;
-}
-
-.receipt-title-with-emoji {
-    font-weight: 700;
-    font-size: 1.8rem;
-    margin-bottom: 10px;
-}
-
-.receipt-title-with-emoji .gradient-text {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    display: inline-block;
-}
-
-.receipt-info {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.9rem;
-    color: #666;
-    margin-bottom: 20px;
-}
-
-.receipt-total {
-    background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
-    border-radius: 10px;
-    padding: 20px;
-    margin-top: 20px;
-    border: 2px solid #e8eaf6;
-}
-
-.receipt-footer {
-    text-align: center;
-    margin-top: 20px;
-    padding-top: 15px;
-    border-top: 1px dashed #e8eaf6;
-    font-size: 0.8rem;
-    color: #888;
-}
-
-/* Print styles untuk receipt */
-@media print {
-    .noprint { 
-        display: none !important; 
-    }
-    body { 
-        background: white !important; 
-        padding: 0 !important;
-        margin: 0 !important;
-        font-size: 12px !important;
-    }
-    .main-container { 
-        max-width: 100% !important; 
-        margin: 0 !important;
-        padding: 10px !important;
-    }
-    .receipt-card { 
-        border: 1px solid #000 !important; 
-        box-shadow: none !important;
-        margin: 0 !important;
-        padding: 15px !important;
-        page-break-inside: avoid;
-    }
-    .table {
-        font-size: 11px !important;
-    }
-    .receipt-title-with-emoji {
-        font-size: 1.4rem !important;
-    }
-    .receipt-title-with-emoji .gradient-text {
-        -webkit-text-fill-color: #000 !important;
-        color: #000 !important;
-        background: none !important;
-    }
 }
