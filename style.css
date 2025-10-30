@@ -610,3 +610,13 @@ hr {
 .flex-fill {
     flex: 1 1 auto !important;
 }
+
+.form-control.is-invalid {
+    border-color: #e53e3e;
+    box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

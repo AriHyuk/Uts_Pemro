@@ -326,6 +326,37 @@ $menu = get_menu($mysqli);
     document.getElementById('ppnLabel').textContent = rupiah(ppn);
     document.getElementById('grandLabel').textContent = rupiah(grand);
     document.getElementById('changeLabel').textContent = rupiah(change);
+
+    // Warning visual klo uang cash kurang
+    if (payMethod === 'cash') {
+      const cashInput = document.getElementById('cashInput');
+      const saveBtn = document.getElementById('saveBtn');
+      
+      if (cash < grand) {
+        cashInput.classList.add('is-invalid');
+        saveBtn.disabled = true;
+        saveBtn.classList.add('btn-secondary');
+        saveBtn.classList.remove('btn-success');
+      } else {
+        cashInput.classList.remove('is-invalid');
+        saveBtn.disabled = false;
+        saveBtn.classList.remove('btn-secondary');
+        saveBtn.classList.add('btn-success');
+      }
+      
+      if (cash === 0) {
+        cashInput.classList.add('is-invalid');
+        saveBtn.disabled = true;
+        saveBtn.classList.add('btn-secondary');
+        saveBtn.classList.remove('btn-success');
+      }
+    } else {
+      // card selalu enable
+      document.getElementById('cashInput').classList.remove('is-invalid');
+      document.getElementById('saveBtn').disabled = false;
+      document.getElementById('saveBtn').classList.remove('btn-secondary');
+      document.getElementById('saveBtn').classList.add('btn-success');
+    }
   }
 
   function resetFormOnly(){
@@ -372,6 +403,33 @@ $menu = get_menu($mysqli);
         confirmButtonColor: '#667eea'
       }); 
       return; 
+    }
+
+    // Validasi untuk pembayaran cash
+    const payMethod = document.querySelector('input[name="payMethod"]:checked').value;
+    const cash = parseInt(document.getElementById('cashInput').value||'0',10);
+    const grand = cart.reduce((s,r)=>s+r.subtotal,0) + Math.round(cart.reduce((s,r)=>s+r.subtotal,0) * 0.10);
+    
+    if (payMethod === 'cash' && cash < grand) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Uang Tidak Cukup',
+        html: `Total bayar: <strong>${rupiah(grand)}</strong><br>
+              Uang diterima: <strong>${rupiah(cash)}</strong><br><br>
+              Uang yang diterima harus lebih besar atau sama dengan total bayar.`,
+        confirmButtonColor: '#667eea'
+      });
+      return;
+    }
+    
+    if (payMethod === 'cash' && cash === 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Uang Diterima Kosong',
+        text: 'Silakan masukkan jumlah uang yang diterima',
+        confirmButtonColor: '#667eea'
+      });
+      return;
     }
     document.getElementById('cartInput').value = JSON.stringify(cart);
     document.getElementById('payMethodInput').value = document.querySelector('input[name="payMethod"]:checked').value;
